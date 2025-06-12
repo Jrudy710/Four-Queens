@@ -14,7 +14,6 @@
    * When the user tries to do anything larger, it results in a stack overflow error because of the recursion.
 */
 
-package FourQueens;                                                                                               // Sets the destination of the file
 
 public class QueensCompute{                                                                                       // Class Block
    
