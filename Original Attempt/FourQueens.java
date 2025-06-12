@@ -8,7 +8,6 @@
 * 8/30/2021 - Original Version
 */
 
-package FourQueens;                                                                             // Sets the destination of the file
 
 import java.util.Scanner;                                                                       // Imports Java Scanner for User Input 
 
