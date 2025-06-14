@@ -14,6 +14,7 @@
     * method to get the coordinate values. I might also make use of the .contains method for Strings.
 */
 
+import java.io.EOFException;
 import java.util.ArrayList;                                                                                 // Imports the arrayList libraries
 import java.util.Scanner;                                                                                   // Imports Java Scanner
 
@@ -29,8 +30,11 @@ public class FourQueensImplementation{                                          
         size = input.nextInt();                                                                             // Sets the value of size        
 
         // System.out.printf("We will create a %d by %d array to store queens on\n", size, size);           // Debug print statement
-        coordinateConversion('4', true);
+        // False == rows conversion
+        // True == column conversion
+        //System.out.println(coordinateConversion('a', false) + " " + alphaConversion(0));
         board = fillTheArray(size);                                                                         // Call to method fillTheArray
+        board = placeQueens(board);                                                                         // Call to method placeQueens
         printArray(board);                                                                                  // Call to method printArray
     }
     
@@ -67,11 +71,15 @@ public class FourQueensImplementation{                                          
         int row;                                                                                            // Defines row
         int column;                                                                                         // Defines column
         
-        for(row = 0; row < board.length; row++){                                                            // For Loop
+        char rowVal = 'a';                                                                                  // Defines rowVal
+        
+        for(row = 0; row < board.length; row++, rowVal++){                                                            // For Loop
+            System.out.printf("%c ", rowVal);
             for(column = 0; column < board[row].length; column++){                                          // Nested For Loop
                System.out.printf("| %c ", board[row][column]);                                                                  // Prints out to the user 
             }
             System.out.println("|");                                                                        // Prints out to the user
+        
         }
     }
     
@@ -95,5 +103,130 @@ public class FourQueensImplementation{                                          
         // System.out.println(convertedValue);                                                              // Debug print statement
         
         return convertedValue;                                                                              // Returns the value to the user
+    }
+    
+    
+    
+    /*
+        * This is the method that will be used to convert row or column values into the appropriate row value.
+        * I only need to do this for the rows as the columns will already be in the necessary numerical format.
+    */
+    public static char alphaConversion(int colValue){                                                       // Method Block
+        
+                                                                                                            // VARIABLE DEFINITIONS
+        char returnValue = ' ';                                                                             // Defines returnValue
+        
+        returnValue = (char)(colValue + 97);                                                                // Sets the value of returnValue
+        
+        return returnValue;                                                                                 // Returns the value to the user
+        
+    }
+    
+    
+    
+    /*
+        * This is the method that will be used to determine if the position where we hypothetically want
+        * to place a Queen is able to in fact have a queen placed on that position. It will work by going
+        * backward to see if the values conflict with any queens already placed on the board.
+        * If there are no conflicts then true will be returned to the user, otherwise false will be returned.
+    */
+    public static boolean availableSpot(int depth, String queens, String nextPlace){                        // Method Block
+        
+                                                                                                            // VARIABLE DEFINITIONS
+        int row = 0;                                                                                        // Defines row
+        int column = 0;                                                                                     // Defines column
+        
+        String temp = "";                                                                                   // Defines temp
+        
+        temp += nextPlace.charAt(0);                                                                        // Adds to the value of temp
+        
+        // Horizontal Check
+        for(column = Integer.valueOf(nextPlace.substring(1)); column >= 0; column--){                       // For Loop
+            temp += column;                                                                                 // Adds to the value of temp
+            System.out.printf("Horizontally checking %s\n", temp);                                          // Debug print statement
+            if(queens.contains(temp)){                                                                      // If the string is inside the already placed queens
+                System.out.printf("WOMP WOMP Horizontally checking %s\n", temp);                                          // Debug print statement
+                return false;                                                                               // Returns false to the user
+            }
+            else{
+                temp = temp.substring(0, 1);                                                                // Changes the value of temp back to just the row value
+            }
+        }
+        
+        // Moonwalk up the stairs
+        for(row = coordinateConversion(nextPlace.charAt(0), false), column = Integer.valueOf(nextPlace.substring(1)); row >= 0 && column >= 0; row--, column--){
+            
+            temp = "" + alphaConversion(row) + column;                                                      // Updates the value of temp
+            System.out.printf("Moonwalk checking %s\n", temp);                                              // Debug print statement
+            if(queens.contains(temp)){                                                                      // If a queen is already placed on the board
+                System.out.printf("WOMP WOMP Moonwalk checking %s\n", temp);                                              // Debug print statement
+                return false;                                                                               // Returns false to the user
+            }
+        }
+        
+        // fall back down the stairs
+        for(row = coordinateConversion(nextPlace.charAt(0), false), column = Integer.valueOf(nextPlace.substring(1)); row < depth && column >= 0; row++, column--){
+            
+            temp = "" + alphaConversion(row) + column;                                                      // Updates the value of temp
+            System.out.printf("Falling down checking %s\n", temp);                                          // Debug print statement
+            if(queens.contains(temp)){                                                                      // If a queen is already placed on the board
+                System.out.printf("WOMP WOMP Falling down checking %s\n", temp);                                          // Debug print statement
+                return false;                                                                               // Returns false to the user
+            }
+        }
+                
+        return true;                                                                                        // Returns true to the user
+    }
+    
+    public static char[][] placeQueens(char[][] board){                                                     // Method Block
+        
+                                                                                                            // VARIABLE DEFINITIONS
+        int row = 0;                                                                                        // Defines row
+        int column = 0;                                                                                     // Defines column
+        
+        String curr = "";                                                                                   // Defines curr
+        String temp = "";                                                                                   // Defines temp
+        
+        ArrayList<String> myStack = new ArrayList<String>();                                                // Defines myStack
+        
+        String[] queens;                                                                                    // Defines queens
+        
+        myStack.add("");                                                                                    // Adds to myStack
+        
+        while(myStack.size() != 0){                                                                         // Loops through the stack
+            
+            curr = myStack.remove(myStack.size() - 1);                                                      // DFS traversal pop
+            System.out.println("Value in the stack: " + curr);                                              // Debug print statement
+            
+            queens = curr.split(",");                                                                       // Defines the number of queens on the current iteration of the board
+            
+            // The first iteration of the loop
+            if(curr.equals("") && myStack.size() == 0){                                                     // If statement
+                column = 0;                                                                                 // Sets the value of column
+            }
+            else{                                                                                           // Else statement
+                column = Integer.valueOf(queens[queens.length - 1].substring(1));                                                // Sets the value of column
+                column += 1;                                                                                // Adds to the value of column
+            }
+            
+            
+            
+            if(queens.length == board.length){                                                              // If the number of queens supposedly on the board matches the length of the board
+                System.out.println("Coordinates of valid queens: " + curr);
+                break;                                                                                      // Breaks out of the loop
+            }
+            
+            for(row = 0; row < board.length && column < board.length; row++){                               // For Loop
+                temp = alphaConversion(row) + "" + column;                                                       // Sets the value of temp
+                
+                if(availableSpot(board.length, curr, temp)){                                                // If statement
+                    temp = curr.length() > 0 ? curr + "," + temp : temp; 
+                    myStack.add(temp);                                                                      // Adds to myStack
+                }
+            }
+        }
+        
+        
+        return board;                                                                                       // Returns the board to the user
     }
 }
